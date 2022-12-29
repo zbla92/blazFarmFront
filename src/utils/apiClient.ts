@@ -1,8 +1,8 @@
 import axios from 'axios';
 import qs from 'qs';
-// const apiURL = 'http://localhost:3000';
 
-const apiURL = 'https://blazfarmapi-production.up.railway.app';
+const apiURL = 'http://localhost:3000';
+// const apiURL = 'https://blazfarmapi-production.up.railway.app';
 
 axios.interceptors.request.use(
   async configData => {

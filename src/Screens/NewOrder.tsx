@@ -7,17 +7,21 @@ import NavigationBar from '../components/NavigationBar';
 
 import Screen from '../components/Screen';
 import { colors } from '../theme';
-import { newOrderService } from '../utils/services';
+import { newOrderService, updateOrdersService } from '../utils/services';
 
 const NewOrder = ({ navigation, route }) => {
   const queryClient = useQueryClient();
-  const user = route?.params?.user;
+
+  const order = route?.params?.order;
+  const user = route?.params?.user || order?.user;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [productId, setProductId] = useState('1');
   const [quantity, setQuantity] = useState(null);
 
   const resetForm = () => {};
+
+  console.log(quantity, 'order');
 
   const makeOrder = async () => {
     if (!user?.id || !productId || !quantity) {
@@ -39,6 +43,33 @@ const NewOrder = ({ navigation, route }) => {
     }
   };
 
+  const editOrder = async () => {
+    if (!user?.id || !productId || !quantity) {
+      setError('Morate popuniti sva polja');
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await updateOrdersService({ userId: `${user?.id}`, productId, quantity, orderId: order?.id });
+      console.log(response);
+      setLoading(false);
+      resetForm();
+      queryClient.invalidateQueries('orders');
+      navigation.navigate('ORDERS_PREVIEW');
+    } catch (e) {
+      setError(e);
+      setLoading(false);
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    if (order) {
+      setProductId(order?.product?.id);
+      setQuantity(`${order?.quantity}`);
+    }
+  }, [order]);
+
   return (
     <Screen withKeyboard>
       <NavigationBar />
@@ -50,28 +81,30 @@ const NewOrder = ({ navigation, route }) => {
         <Text style={styles.label}>Proizvod</Text>
         <View style={styles.productButtonSelections}>
           <Pressable
-            style={[styles.productSelector, productId === '1' && styles.active]}
+            style={[styles.productSelector, productId == '1' && styles.active]}
             onPress={() => setProductId('1')}
             disabled={productId === '1'}>
-            <Text style={[styles.productSelectorText, productId === '1' && styles.activeText]}>Jaja</Text>
+            <Text style={[styles.productSelectorText, productId == '1' && styles.activeText]}>Jaja</Text>
           </Pressable>
           <Pressable
-            style={[styles.productSelector, productId === '2' && styles.active]}
+            style={[styles.productSelector, productId == '2' && styles.active]}
             onPress={() => setProductId('2')}
             disabled={productId === '2'}>
-            <Text style={[styles.productSelectorText, productId === '2' && styles.activeText]}>Pilici</Text>
+            <Text style={[styles.productSelectorText, productId == '2' && styles.activeText]}>Pilici</Text>
           </Pressable>
         </View>
 
-        <Text style={styles.label}>Kolicina {productId === '2' && '(kg)'}</Text>
+        <Text style={styles.label}>Kolicina {productId == '2' && '(kg)'}</Text>
         <TextInput
           style={styles.input}
           onChangeText={v => setQuantity(v)}
+          value={quantity}
+          defaultValue={quantity}
           placeholder="Kolicina"
           keyboardType="numeric"
         />
         <View style={styles.actionButton}>
-          <Button label="Dodaj" onPress={makeOrder} isLoading={loading} />
+          <Button label={order ? 'Edituj' : 'Dodaj'} onPress={order ? editOrder : makeOrder} isLoading={loading} />
         </View>
       </View>
     </Screen>

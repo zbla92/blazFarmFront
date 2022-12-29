@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import Button from '../components/Button';
 import { useQueryClient } from '@tanstack/react-query';
 import NavigationBar from '../components/NavigationBar';
 import Screen from '../components/Screen';
 import { updateOrdersService } from '../utils/services';
+import { colors } from '../theme';
 
 const OrderPreview = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
@@ -30,7 +31,14 @@ const OrderPreview = ({ navigation, route }) => {
 
   return (
     <Screen>
-      <NavigationBar title="Narudzba" />
+      <NavigationBar
+        title="Narudzba"
+        rightAction={
+          <Pressable style={styles.editButton} hitSlop={10} onPress={() => navigation.navigate('NEW_ORDER', { order })}>
+            <Text style={styles.link}>Edit</Text>
+          </Pressable>
+        }
+      />
       <View style={styles.container}>
         <View style={styles.element}>
           <Text style={styles.label}>ID Narudzbe: </Text>
@@ -50,7 +58,7 @@ const OrderPreview = ({ navigation, route }) => {
         </View>
         <View style={styles.element}>
           <Text style={styles.label}>Cijena</Text>
-          <Text style={styles.value}>{order?.product?.price * order?.quantity}</Text>
+          <Text style={styles.value}>{Math.round(order?.product?.price * order?.quantity)}</Text>
         </View>
         <View style={styles.element}>
           <Text style={styles.label}>Adresa</Text>
@@ -58,7 +66,9 @@ const OrderPreview = ({ navigation, route }) => {
         </View>
         <View style={styles.element}>
           <Text style={styles.label}>Telefon</Text>
-          <Text style={styles.value}>{order?.user?.phone}</Text>
+          <Pressable onPress={() => Linking.openURL(`tel:${order?.user?.phone}`)}>
+            <Text style={[styles.value, styles.link]}>{order?.user?.phone}</Text>
+          </Pressable>
         </View>
         <View style={styles.element}>
           <Text style={styles.label}>Status</Text>
@@ -98,7 +108,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: 'black',
+    color: colors.text,
   },
   value: {
     fontSize: 18,
@@ -109,5 +119,16 @@ const styles = StyleSheet.create({
     margin: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  link: {
+    color: colors.link,
+  },
+  editButton: {
+    backgroundColor: colors.primaryBackground,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 20,
+    borderWidth: 0.5,
+    borderColor: colors.primary,
   },
 });

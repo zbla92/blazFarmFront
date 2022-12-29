@@ -23,10 +23,6 @@ const OrderItem = ({ item }) => {
           <Text style={styles.itemText}>{item?.user?.name}</Text>
         </View>
         <View style={styles.itemElement}>
-          <Text style={styles.itemLabel}>Phone:</Text>
-          <Text style={styles.itemText}>{item?.user?.phone}</Text>
-        </View>
-        <View style={styles.itemElement}>
           <Text style={styles.itemLabel}>Proizvod:</Text>
           <Text numberOfLines={1} style={styles.itemText}>
             {item?.quantity} {item?.product?.name} ({Math.round(item?.product?.price * item.quantity)} km)
@@ -74,8 +70,15 @@ const OrdersPreview = ({ navigation }) => {
 
   const { total, collected, remaining } = calculateTotal();
 
+  const filteredOrders = orders.filter(order => {
+    if (search) {
+      return order?.user?.name?.toLowerCase().includes(search.toLowerCase());
+    }
+    return true;
+  });
+
   return (
-    <Screen noPadding>
+    <Screen noPadding withKeyboard>
       <View style={{ marginHorizontal: 16 }}>
         <NavigationBar title="Pregled narudzbi" />
       </View>
@@ -85,7 +88,7 @@ const OrdersPreview = ({ navigation }) => {
       {orders?.length > 0 ? (
         <FlatList
           contentContainerStyle={styles.list}
-          data={orders}
+          data={filteredOrders}
           renderItem={({ item }) => <OrderItem item={item} />}
           keyboardShouldPersistTaps="handled"
           ListFooterComponent={

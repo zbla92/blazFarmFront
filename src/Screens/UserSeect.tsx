@@ -44,10 +44,12 @@ const UserSelect = ({ navigation }) => {
 
   const { data: users } = useUsers();
 
-  console.log(users);
+  const filteredUsers = users?.filter(user => {
+    return user.name.toLowerCase().includes(search.toLowerCase());
+  });
 
   return (
-    <Screen noPadding>
+    <Screen noPadding withKeyboard>
       <View style={{ marginHorizontal: 16 }}>
         <NavigationBar />
       </View>
@@ -57,7 +59,7 @@ const UserSelect = ({ navigation }) => {
       {users?.length > 0 ? (
         <FlatList
           contentContainerStyle={styles.list}
-          data={users}
+          data={filteredUsers}
           renderItem={({ item }) => <UserItem item={item} />}
           keyboardShouldPersistTaps="handled"
         />
